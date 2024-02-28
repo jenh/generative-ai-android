@@ -21,10 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,7 +32,9 @@ import androidx.compose.ui.unit.dp
 data class MenuItem(
     val routeId: String,
     val titleResId: Int,
-    val descriptionResId: Int
+    val descriptionResId: Int,
+    val modelName: String = "Model name not specified",
+    val isCrashButton: Boolean = false // New flag
 )
 
 @Composable
@@ -43,9 +42,11 @@ fun MenuScreen(
     onItemClicked: (String) -> Unit = { }
 ) {
     val menuItems = listOf(
-        MenuItem("summarize", R.string.menu_summarize_title, R.string.menu_summarize_description),
-        MenuItem("photo_reasoning", R.string.menu_reason_title, R.string.menu_reason_description),
-        MenuItem("chat", R.string.menu_chat_title, R.string.menu_chat_description)
+        MenuItem("summarize", R.string.menu_summarize_title, R.string.menu_summarize_description, remoteConfig.getString("summarize_model")),
+        MenuItem("photo_reasoning", R.string.menu_reason_title, R.string.menu_reason_description, remoteConfig.getString("photo_reasoning_model")),
+        MenuItem("chat", R.string.menu_chat_title, R.string.menu_chat_description, remoteConfig.getString("chat_reasoning_model")),
+        MenuItem("crash", R.string.menu_crash_title, R.string.menu_crash_description, isCrashButton = remoteConfig.getBoolean("crash")) // Add crash button item
+
     )
     LazyColumn(
         Modifier
@@ -71,16 +72,28 @@ fun MenuScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(top = 8.dp)
                     )
-                    TextButton(
-                        onClick = {
-                            onItemClicked(menuItem.routeId)
-                        },
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        Text(text = stringResource(R.string.action_try))
-                    }
-                }
-            }
+                    if (!menuItem.isCrashButton) { // Only show 'Try it' if not a crash button
+                        TextButton(
+                            onClick = { onItemClicked(menuItem.routeId) },
+                            modifier = Modifier.align(Alignment.End)
+                        ) {
+                            //Text(text = stringResource(R.string.action_try), menuItem.modelName)
+                            Text(text = menuItem.modelName)
+                        }
+                    } else {
+
+                        Button(
+                            onClick = {
+                                throw RuntimeException("Test Crash for Crashlytics")
+                            },
+                            modifier = Modifier
+                                .align(Alignment.End)
+                                .padding(top = 2.dp), // Add some spacing
+                            //colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.error) // Make it stand out
+                        ) {
+                            Text(text = "Force Crash")
+                        }
+                    }}}
         }
     }
 }
