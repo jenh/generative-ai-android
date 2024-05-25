@@ -18,11 +18,19 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
     namespace = "com.google.ai.sample"
     compileSdk = 34
+
+afterEvaluate {
+        tasks.named("mapDebugSourceSetPaths").configure {
+            dependsOn("processDebugGoogleServices")
+        }
+    }
 
     defaultConfig {
         applicationId = "com.google.ai.sample"
@@ -76,4 +84,15 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     implementation("com.google.ai.client.generativeai:generativeai:0.2.0")
+
+    implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-config")
+    implementation("com.google.firebase:firebase-crashlytics")
+
+    // get iid for testing
+    implementation("com.google.firebase:firebase-installations:17.2.0")
+
+
+
 }

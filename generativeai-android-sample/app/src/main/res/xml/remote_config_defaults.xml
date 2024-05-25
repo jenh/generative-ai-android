@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<defaults>
+  <entry>
+    <key>winter_promo_banner</key>
+    <value>false</value>
+  </entry>
+  <entry>
+    <key>crash</key>
+    <value>true</value>
+  </entry>
+  <entry>
+    <key>welcome_message</key>
+    <value>Default value (non-rollout or control)</value>
+  </entry>
+  <entry>
+    <key>favorite_soda</key>
+    <value />
+  </entry>
+  <entry>
+    <key>test</key>
+    <value />
+  </entry>
+  <entry>
+    <key>chat_reasoning_model</key>
+    <value>not-gemini-1.0-pro</value>
+  </entry>
+  <entry>
+    <key>photo_reasoning_model</key>
+    <value>not-gemini-1.0-pro-vision-latest</value>
+  </entry>
+  <entry>
+    <key>summarize_model</key>
+    <value>not-gemini-1.0-pro</value>
+  </entry>
+  <entry>
+    <key>api_key</key>
+    <value>AIAIAIAIAIA</value>
+  </entry>
+</defaults>

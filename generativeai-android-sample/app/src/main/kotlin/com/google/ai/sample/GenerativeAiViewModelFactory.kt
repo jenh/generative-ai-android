@@ -16,6 +16,10 @@
 
 package com.google.ai.sample
 
+import android.content.ContentValues
+import android.util.Log
+import android.view.ViewGroup
+import android.widget.Button
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
@@ -24,8 +28,21 @@ import com.google.ai.client.generativeai.type.generationConfig
 import com.google.ai.sample.feature.chat.ChatViewModel
 import com.google.ai.sample.feature.multimodal.PhotoReasoningViewModel
 import com.google.ai.sample.feature.text.SummarizeViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.analytics.FirebaseAnalytics
+// Import Remote Config reqs
+import com.google.firebase.remoteconfig.ConfigUpdate
+import com.google.firebase.remoteconfig.ConfigUpdateListener
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigException
+import com.google.firebase.remoteconfig.get
+import com.google.firebase.remoteconfig.remoteConfig
+import com.google.firebase.remoteconfig.remoteConfigSettings
+//import com.google.firebase.analytics
+
 
 val GenerativeViewModelFactory = object : ViewModelProvider.Factory {
+
     override fun <T : ViewModel> create(
         viewModelClass: Class<T>,
         extras: CreationExtras
@@ -34,35 +51,48 @@ val GenerativeViewModelFactory = object : ViewModelProvider.Factory {
             temperature = 0.7f
         }
 
+
         return with(viewModelClass) {
+            remoteConfig = FirebaseRemoteConfig.getInstance() // Initialize here
+            remoteConfig.fetchAndActivate()
+                .addOnSuccessListener {
+                    Log.d("MainActivity", "Remote Config values fetched and activated from GenerativeAIViewModelFactory")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("MainActivity", "Error fetching Remote Config from GenerativeAIViewModelFactory", e)
+                }
+            val apiKey = remoteConfig.getString("api_key")
+                    Log.d("MainActivity", "got API key as $apiKey")
             when {
                 isAssignableFrom(SummarizeViewModel::class.java) -> {
-                    // Initialize a GenerativeModel with the `gemini-pro` AI model
-                    // for text generation
+                    // *** Get model name from Remote Config ***
+                    val modelName = remoteConfig.getString("summarize_model")
+                            Log.d("got summarize model as ", remoteConfig.getString("summarize_model"))
                     val generativeModel = GenerativeModel(
-                        modelName = "gemini-1.0-pro",
-                        apiKey = BuildConfig.apiKey,
+                        modelName = modelName,
+                        apiKey = apiKey,
                         generationConfig = config
                     )
                     SummarizeViewModel(generativeModel)
                 }
 
                 isAssignableFrom(PhotoReasoningViewModel::class.java) -> {
-                    // Initialize a GenerativeModel with the `gemini-pro-vision` AI model
-                    // for multimodal text generation
+                    // *** Get model name from Remote Config ***
+                    val modelName = remoteConfig.getString("photo_reasoning_model")
                     val generativeModel = GenerativeModel(
-                        modelName = "gemini-1.0-pro-vision-latest",
-                        apiKey = BuildConfig.apiKey,
+                        modelName = modelName,
+                        apiKey = apiKey,
                         generationConfig = config
                     )
                     PhotoReasoningViewModel(generativeModel)
                 }
 
                 isAssignableFrom(ChatViewModel::class.java) -> {
-                    // Initialize a GenerativeModel with the `gemini-pro` AI model for chat
+                    // Get model name from Remote Config
+                    val modelName = remoteConfig.getString("chat_reasoning_model")
                     val generativeModel = GenerativeModel(
-                        modelName = "gemini-1.0-pro",
-                        apiKey = BuildConfig.apiKey,
+                        modelName = modelName,
+                        apiKey = apiKey,
                         generationConfig = config
                     )
                     ChatViewModel(generativeModel)

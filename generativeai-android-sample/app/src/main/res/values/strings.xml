@@ -37,4 +37,6 @@
     <!-- Chat sample strings -->
     <string name="chat_label">Message</string>
     <string name="action_send">Send</string>
+    <string name="menu_crash_title">Crash this app?</string>
+    <string name="menu_crash_description">Click this to crash the app</string>
 </resources>
